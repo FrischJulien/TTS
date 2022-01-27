@@ -36,7 +36,7 @@ def train(script_name,restore_path):
     try:
         shutil.copyfile(os.path.join(scripts_path,script_name), "/workspace/TTS/train_script.py")
         print("{} copied".format(script_name))
-        shutil.copyfile(restore_path), "/workspace/TTS/copied_checkpoint.pth.tar")
+        shutil.copyfile(restore_path, "/workspace/TTS/copied_checkpoint.pth.tar")
         print("{} copied".format(restore_path))
         os.environ["CUDA_VISIBLE_DEVICES"]="0, 1 , 2, 3"
         print("Cuda visible devices put to 4")
