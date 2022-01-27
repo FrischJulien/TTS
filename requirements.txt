@@ -15,7 +15,8 @@ soundfile
 tensorboardX
 torch>=1.7
 tqdm
-numba==0.53
+#numba==0.53
+numba==0.48
 umap-learn==0.5.1
 anyascii
 coqpit
