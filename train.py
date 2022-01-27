@@ -38,7 +38,7 @@ def train(script_name,restore_path):
         print("{} copied".format(script_name))
         os.environ["CUDA_VISIBLE_DEVICES"]="0, 1 , 2, 3"
         print("Cuda visible devices put to 4")
-        os.system("python distribute-Copy.py --script train_script.py --restore_path {}".format(restore_path))
+        os.system("python3 distribute-Copy.py --script train_script.py --restore_path {}".format(restore_path))
         print('Training complete.')
     except Exception as e:
         # Write out an error file. This will be returned as the failureReason in the
