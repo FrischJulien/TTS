@@ -36,7 +36,12 @@ def train(script_name,restore_path):
     try:
         shutil.copyfile(os.path.join(scripts_path,script_name), "/workspace/TTS/train_script.py")
         print("{} copied".format(script_name))
-        os.system("CUDA_VISIBLE_DEVICES=\"0, 1, 2, 3\" python distribute-Copy.py --script train_script.py --restore_path {}".format(restore_path))
+        os.environ["CUDA_VISIBLE_DEVICES"]="0, 1 , 2, 3"
+        print("Cuda visible devices put to 4")
+        os.system("python distribute-Copy.py --script train_script.py --restore_path {}".format(restore_path))
+        print("tried with python")
+        os.system("python3 distribute-Copy.py --script train_script.py --restore_path {}".format(restore_path))
+        print("tried with python3")
         print('Training complete.')
     except Exception as e:
         # Write out an error file. This will be returned as the failureReason in the
