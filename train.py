@@ -16,6 +16,8 @@ import collections
 
 import glob
 
+import time
+
 
 # These are the paths to where SageMaker mounts interesting things in your container.
 prefix = '/opt/ml/'
@@ -34,6 +36,9 @@ model_path="/workspace/foxp2/checkpoints"
 def train(script_name,restore_path):
     print('Starting the training.')
     try:
+        print("Starting to wait")
+        time.sleep(500)
+        print("5 minutes wait ended")
         shutil.copyfile(os.path.join(scripts_path,script_name), "/workspace/TTS/train_script.py")
         print("{} copied".format(script_name))
         shutil.copyfile(restore_path, "/workspace/TTS/copied_checkpoint.pth.tar")
