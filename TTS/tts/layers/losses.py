@@ -634,7 +634,7 @@ class VitsGeneratorLoss(nn.Module):
         loss_gen = self.generator_loss(scores_disc_fake)[0] * self.gen_loss_alpha
         loss_mel = torch.nn.functional.l1_loss(mel, mel_hat) * self.mel_loss_alpha
         loss_duration = torch.sum(loss_duration.float()) * self.dur_loss_alpha
-        loss = loss_kl + loss_feat + loss_mel/8 + loss_gen + loss_duration
+        loss = loss_kl + loss_feat + loss_mel/4 + loss_gen + loss_duration
 
         if use_speaker_encoder_as_loss:
             loss_se = self.cosine_similarity_loss(gt_spk_emb, syn_spk_emb) * self.spk_encoder_loss_alpha
