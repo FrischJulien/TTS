@@ -6,7 +6,8 @@ torch>=1.7
 torchaudio
 soundfile
 librosa==0.8.0
-numba==0.53
+#numba==0.53
+numba==0.48
 inflect
 tqdm
 anyascii
