@@ -225,7 +225,7 @@ class Wavernn(BaseVocoder):
         super().__init__(config)
 
         if isinstance(self.args.mode, int):
-            self.n_classes = 2**self.args.mode
+            self.n_classes = 2 ** self.args.mode
         elif self.args.mode == "mold":
             self.n_classes = 3 * 10
         elif self.args.mode == "gauss":
@@ -568,13 +568,12 @@ class Wavernn(BaseVocoder):
         return self.train_step(batch, criterion)
 
     @torch.no_grad()
-    def test(
-        self, assets: Dict, test_loader: "DataLoader", output: Dict  # pylint: disable=unused-argument
+    def test_run(
+        self, assets: Dict, samples: List[Dict], output: Dict  # pylint: disable=unused-argument
     ) -> Tuple[Dict, Dict]:
         ap = assets["audio_processor"]
         figures = {}
         audios = {}
-        samples = test_loader.dataset.load_test_samples(1)
         for idx, sample in enumerate(samples):
             x = torch.FloatTensor(sample[0])
             x = x.to(next(self.parameters()).device)
@@ -601,14 +600,14 @@ class Wavernn(BaseVocoder):
         config: Coqpit,
         assets: Dict,
         is_eval: True,
-        samples: List,
+        data_items: List,
         verbose: bool,
         num_gpus: int,
     ):
         ap = assets["audio_processor"]
         dataset = WaveRNNDataset(
             ap=ap,
-            items=samples,
+            items=data_items,
             seq_len=config.seq_len,
             hop_len=ap.hop_length,
             pad=config.model_args.pad,
@@ -632,7 +631,3 @@ class Wavernn(BaseVocoder):
     def get_criterion(self):
         # define train functions
         return WaveRNNLoss(self.args.mode)
-
-    @staticmethod
-    def init_from_config(config: "WavernnConfig"):
-        return Wavernn(config)

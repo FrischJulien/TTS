@@ -1,7 +1,6 @@
 import os
 
-from trainer import Trainer, TrainerArgs
-
+from TTS.trainer import Trainer, TrainingArgs
 from TTS.utils.audio import AudioProcessor
 from TTS.vocoder.configs import WavernnConfig
 from TTS.vocoder.datasets.preprocess import load_wav_data
@@ -40,7 +39,7 @@ model = Wavernn(config)
 
 # init the trainer and 🚀
 trainer = Trainer(
-    TrainerArgs(),
+    TrainingArgs(),
     config,
     output_path,
     model=model,

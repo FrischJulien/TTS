@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List
+from typing import List
 
 from coqpit import Coqpit, check_argument
 
@@ -50,16 +50,9 @@ class GSTConfig(Coqpit):
 
 @dataclass
 class CharactersConfig(Coqpit):
-    """Defines arguments for the `BaseCharacters` or `BaseVocabulary` and their subclasses.
+    """Defines character or phoneme set used by the model
 
     Args:
-        characters_class (str):
-            Defines the class of the characters used. If None, we pick ```Phonemes``` or ```Graphemes``` based on
-            the configuration. Defaults to None.
-
-        vocab_dict (dict):
-            Defines the vocabulary dictionary used to encode the characters. Defaults to None.
-
         pad (str):
             characters in place of empty padding. Defaults to None.
 
@@ -69,9 +62,6 @@ class CharactersConfig(Coqpit):
         bos (str):
             characters showing the beginning of a sentence. Defaults to None.
 
-        blank (str):
-            Optional character used between characters by some models for better prosody. Defaults to `_blank`.
-
         characters (str):
             character set used by the model. Characters not in this list are ignored when converting input text to
             a list of sequence IDs. Defaults to None.
@@ -80,32 +70,32 @@ class CharactersConfig(Coqpit):
             characters considered as punctuation as parsing the input sentence. Defaults to None.
 
         phonemes (str):
-            characters considered as parsing phonemes. This is only for backwards compat. Use `characters` for new
-            models. Defaults to None.
+            characters considered as parsing phonemes. Defaults to None.
 
-        is_unique (bool):
+        unique (bool):
             remove any duplicate characters in the character lists. It is a bandaid for compatibility with the old
-            models trained with character lists with duplicates. Defaults to True.
-
-        is_sorted (bool):
-            Sort the characters in alphabetical order. Defaults to True.
+            models trained with character lists with duplicates.
     """
 
-    characters_class: str = None
-
-    # using BaseVocabulary
-    vocab_dict: Dict = None
-
-    # using on BaseCharacters
     pad: str = None
     eos: str = None
     bos: str = None
-    blank: str = None
     characters: str = None
     punctuations: str = None
     phonemes: str = None
-    is_unique: bool = True  # for backwards compatibility of models trained with char sets with duplicates
-    is_sorted: bool = True
+    unique: bool = True  # for backwards compatibility of models trained with char sets with duplicates
+
+    def check_values(
+        self,
+    ):
+        """Check config fields"""
+        c = asdict(self)
+        check_argument("pad", c, prerequest="characters", restricted=True)
+        check_argument("eos", c, prerequest="characters", restricted=True)
+        check_argument("bos", c, prerequest="characters", restricted=True)
+        check_argument("characters", c, prerequest="characters", restricted=True)
+        check_argument("phonemes", c, restricted=True)
+        check_argument("punctuations", c, prerequest="characters", restricted=True)
 
 
 @dataclass
@@ -120,13 +110,8 @@ class BaseTTSConfig(BaseTrainingConfig):
         use_phonemes (bool):
             enable / disable phoneme use.
 
-        phonemizer (str):
-            Name of the phonemizer to use. If set None, the phonemizer will be selected by `phoneme_language`.
-            Defaults to None.
-
-        phoneme_language (str):
-            Language code for the phonemizer. You can check the list of supported languages by running
-            `python TTS/tts/utils/text/phonemizers/__init__.py`. Defaults to None.
+        use_espeak_phonemes (bool):
+            enable / disable eSpeak-compatible phonemes (only if use_phonemes = `True`).
 
         compute_input_seq_cache (bool):
             enable / disable precomputation of the phoneme sequences. At the expense of some delay at the beginning of
@@ -159,19 +144,11 @@ class BaseTTSConfig(BaseTrainingConfig):
         sort_by_audio_len (bool):
             If true, dataloder sorts the data by audio length else sorts by the input text length. Defaults to `False`.
 
-        min_text_len (int):
-            Minimum length of input text to be used. All shorter samples will be ignored. Defaults to 0.
+        min_seq_len (int):
+            Minimum sequence length to be used at training.
 
-        max_text_len (int):
-            Maximum length of input text to be used. All longer samples will be ignored. Defaults to float("inf").
-
-        min_audio_len (int):
-            Minimum length of input audio to be used. All shorter samples will be ignored. Defaults to 0.
-
-        max_audio_len (int):
-            Maximum length of input audio to be used. All longer samples will be ignored. The maximum length in the
-            dataset defines the VRAM used in the training. Hence, pay attention to this value if you encounter an
-            OOM error in training. Defaults to float("inf").
+        max_seq_len (int):
+            Maximum sequence length to be used at training. Larger values result in more VRAM usage.
 
         compute_f0 (int):
             (Not in use yet).
@@ -179,15 +156,8 @@ class BaseTTSConfig(BaseTrainingConfig):
         compute_linear_spec (bool):
             If True data loader computes and returns linear spectrograms alongside the other data.
 
-        precompute_num_workers (int):
-            Number of workers to precompute features. Defaults to 0.
-
         use_noise_augment (bool):
             Augment the input audio with random noise.
-
-        start_by_longest (bool):
-            If True, the data loader will start loading the longest batch first. It is useful for checking OOM issues.
-            Defaults to False.
 
         add_blank (bool):
             Add blank characters between each other two characters. It improves performance for some models at expense
@@ -213,19 +183,12 @@ class BaseTTSConfig(BaseTrainingConfig):
 
         test_sentences (List[str]):
             List of sentences to be used at testing. Defaults to '[]'
-
-        eval_split_max_size (int):
-            Number maximum of samples to be used for evaluation in proportion split. Defaults to None (Disabled).
-
-        eval_split_size (float):
-            If between 0.0 and 1.0 represents the proportion of the dataset to include in the evaluation set.
-            If > 1, represents the absolute number of evaluation samples. Defaults to 0.01 (1%).
     """
 
     audio: BaseAudioConfig = field(default_factory=BaseAudioConfig)
     # phoneme settings
     use_phonemes: bool = False
-    phonemizer: str = None
+    use_espeak_phonemes: bool = True
     phoneme_language: str = None
     compute_input_seq_cache: bool = False
     text_cleaner: str = None
@@ -234,21 +197,17 @@ class BaseTTSConfig(BaseTrainingConfig):
     phoneme_cache_path: str = None
     # vocabulary parameters
     characters: CharactersConfig = None
-    add_blank: bool = False
     # training params
     batch_group_size: int = 0
     loss_masking: bool = None
     # dataloading
     sort_by_audio_len: bool = False
-    min_audio_len: int = 1
-    max_audio_len: int = float("inf")
-    min_text_len: int = 1
-    max_text_len: int = float("inf")
+    min_seq_len: int = 1
+    max_seq_len: int = float("inf")
     compute_f0: bool = False
     compute_linear_spec: bool = False
-    precompute_num_workers: int = 0
     use_noise_augment: bool = False
-    start_by_longest: bool = False
+    add_blank: bool = False
     # dataset
     datasets: List[BaseDatasetConfig] = field(default_factory=lambda: [BaseDatasetConfig()])
     # optimizer
@@ -259,6 +218,3 @@ class BaseTTSConfig(BaseTrainingConfig):
     lr_scheduler_params: dict = field(default_factory=lambda: {})
     # testing
     test_sentences: List[str] = field(default_factory=lambda: [])
-    # evaluation
-    eval_split_max_size: int = None
-    eval_split_size: float = 0.01

@@ -165,4 +165,3 @@ internal/*
 *_phoneme.npy
 wandb
 depot/*
-coqui_recipes/*

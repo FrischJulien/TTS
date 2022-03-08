@@ -7,14 +7,15 @@ import subprocess
 import time
 
 import torch
-from trainer import TrainerArgs
+
+from TTS.trainer import TrainingArgs
 
 
 def main():
     """
     Call train.py as a new process and pass command arguments
     """
-    parser = TrainerArgs().init_argparse(arg_prefix="")
+    parser = TrainingArgs().init_argparse(arg_prefix="")
     parser.add_argument("--script", type=str, help="Target training script to distibute.")
     args, unargs = parser.parse_known_args()
 

@@ -8,7 +8,6 @@ import traceback
 
 import torch
 from torch.utils.data import DataLoader
-from trainer.torch import NoamLR
 
 from TTS.speaker_encoder.dataset import SpeakerEncoderDataset
 from TTS.speaker_encoder.losses import AngleProtoLoss, GE2ELoss, SoftmaxAngleProtoLoss
@@ -20,7 +19,7 @@ from TTS.utils.audio import AudioProcessor
 from TTS.utils.generic_utils import count_parameters, remove_experiment_folder, set_init_dict
 from TTS.utils.io import load_fsspec
 from TTS.utils.radam import RAdam
-from TTS.utils.training import check_update
+from TTS.utils.training import NoamLR, check_update
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
