@@ -30,7 +30,8 @@ def main():
         command = [args.script]
     command.append("--continue_path={}".format(args.continue_path))
     command.append("--restore_path={}".format(args.restore_path))
-    command.append("--config_path={}".format(args.config_path))
+    #command.append("--config_path={}".format(args.config_path))
+    command.append("--config_path={}".format("/workspace/TTS/vits_vctk_mai_siwis_phon/config.json"))
     command.append("--group_id=group_{}".format(group_id))
     command.append("--use_ddp=true")
     command += unargs
